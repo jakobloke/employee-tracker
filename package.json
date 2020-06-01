@@ -14,6 +14,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "mysql db/employees.db < db/schema.sql",
     "seed": "mysql db/employees.db < db/seeds.sql",
+    "db": "mysql db/election.db",
     "start": "node server.js"
   },
   "repository": {
