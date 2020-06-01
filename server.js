@@ -314,7 +314,7 @@ updateManager = () => {
             })
 
             const managerChoicesUpdate = newManagerUpdate.map(man => {
-                const newManagerChoice = {name: manager.first_name + ' ' + manager.last_name, value: man.id};
+                const newManagerChoice = {name: man.first_name + ' ' + man.last_name, value: man.id};
                 return newManagerChoice;
             })
 
