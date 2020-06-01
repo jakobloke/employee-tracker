@@ -10,12 +10,14 @@
     "mysql2": "^2.1.0",
     "sqlite3": "^4.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jest": "^26.0.1"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "migrate": "mysql db/employees.db < db/schema.sql",
     "seed": "mysql db/employees.db < db/seeds.sql",
-    "db": "mysql db/election.db",
+    "db": "mysql -u root -p 'db/election.db'",
     "start": "node server.js"
   },
   "repository": {
