@@ -1,11 +1,12 @@
 const inquirer = require ('inquirer');
 const cTable = require('console.table');
 const express = require('express');
-const db = require('./db/database');
+const db = require('./db/database.js');
 const mysql = require('mysql2');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Express middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
@@ -16,19 +17,20 @@ app.use((req, res) => {
 db.connect(err => {
     if (err) throw err;
     console.log('Connected!')
-    //call function to start choices
-    startChoices();
+    //call function to prompt choices
+    promptChoices();
 });
+
 
 displayDepartments = () => {
     console.log('Displaying departments...');
     const sql = `SELECT * FROM department ORDER BY name DESC`;
 
     db.query(sql, (err, rows) => {
-        if (err) throw err;
+        if(err) throw err;
         console.table(rows);
 
-        startChoices();
+        promptChoices();
     });
 };
 
@@ -36,18 +38,18 @@ displayRoles = () => {
     console.log('Displaying departments...');
     const sql = `SELECT * FROM role ORDER BY title DESC`;
     const sql2 = `SELECT role.title, role.salary, role.id, department.name AS department FROM role
-                    LEFT JOIN epartment ON role.department_id = department.id ORDER BY title DESC`;
+                    LEFT JOIN department ON role.department_id = department.id ORDER BY title DESC`;
     
     db.promise().query(sql2, (err, rows) => {
         if(err) throw err;
         console.table(rows);
 
-        startChoices();
+        promptChoices();
     });
 };
 
 displayEmployees = () => {
-    console.lot('Displaying employees...');
+    console.log('Displaying employees...');
     const sql = `SELECT e.id,
                     e.first_name,
                     e.last_name,
@@ -65,7 +67,7 @@ displayEmployees = () => {
         if (err) throw err;
         console.table(rows);
 
-        startChoices();
+        promptChoices();
     });
 };
 
@@ -87,7 +89,7 @@ addDept = () => {
     ])
     .then(answer => {
         const sql = `INSERT INTO department (name)
-        VALUES ()?`;
+        VALUES (?)`;
         db.query(sql, answer.addNewDept, (err, result) => {
             if(err) throw err;
             console.log('Added Department: ' + answer.addNewDept);
@@ -113,7 +115,7 @@ addRole = () => {
                 message: 'What role will be added?', 
                 name: 'addNewRole',
                 validate: roleInput => {
-                    if(roleInput.math('[a-zA-Z]+$')) {
+                    if(roleInput.match('[a-zA-Z]+$')) {
                         return true;
                     } else {
                         console.log('Please enter an appropriate string');
@@ -160,11 +162,11 @@ addEmployee = () => {
     const managerQueryForEmp = `SELECT
                                 empl.manager_id,
                                 empl.first_name,
-                                ampl.last_name,
+                                empl.last_name,
                                 mgr.first_name,
                                 mgr.last_name,
                                 mgr.id
-                                FROM employeemgr
+                                FROM employee mgr
                                 LEFT JOIN employee empl ON empl.manager_id = mgr.id
                                 WHERE empl.manager_id is not NULL;`
     const roleForNewEmp = `SELECT id, title, salary, department_id FROM role`;
@@ -191,7 +193,7 @@ addEmployee = () => {
                     message: 'First name of the employee?',
                     name: 'addEmployeeFristName',
                     validate: firstNameInput => {
-                        if(firstNameInput.match('[a-Za-Z+$')) {
+                        if(firstNameInput.match('[a-zA-Z]+$')) {
                             return true;
                         } else {
                             console.log('Please enter an appropriate first name');
@@ -251,7 +253,7 @@ updateEmployee = () => {
             if(err) throw err;
 
             const choicesUpdate = employeesForUpdate.map(employee => {
-                const choiceUpdate = {name: (employee.first_name + ' ' + employee.last_name), value: employee.id};
+                const choiceUpdate = {name: (employee.first_name + ' ' + employee.last_name) , value: employee.id};
                 return choiceUpdate;
             })
 
@@ -262,7 +264,7 @@ updateEmployee = () => {
 
             inquirer.prompt([
                 {
-                    type:'lit',
+                    type:'list',
                     message: 'Please select from the list of all employees',
                     name: 'employeeUpdateList',
                     choices: choicesUpdate
@@ -307,12 +309,12 @@ updateManager = () => {
             if(err) throw err;
 
             const newManagerChoices = allNewManagers.map(employee => {
-                const newManagerChoiceUpdate = {name: (employee.first_name + ' ' + employee.last_name), value: employee.id};
+                const newManagerChoiceUpdate = {name: (employee.first_name + ' ' + employee.last_name) , value: employee.id};
                 return newManagerChoiceUpdate;
             })
 
-            const managerChoicesUpdate = allNewManagersUpdate.map(man => {
-                const newManagerChoice = {name: man.first_name + ' ' + man.last_name, value: man.id};
+            const managerChoicesUpdate = newManagerUpdate.map(man => {
+                const newManagerChoice = {name: manager.first_name + ' ' + manager.last_name, value: man.id};
                 return newManagerChoice;
             })
 
@@ -466,7 +468,7 @@ deleteEmployee = () => {
         if(err) throw err;
 
         const employeeDeleteChoices = allDeleteEmp.map(employee => {
-            const employeeDeleteChoice = {name: employee.first_name + ' ' + employee.last_name, value: employee.id};
+            const employeeDeleteChoice = {name: employee.first_name + ' ' + employee.last_name , value: employee.id};
             return employeeDeleteChoice;
         })
 
@@ -499,7 +501,7 @@ const promptChoices = function() {
             message: 'What would you like to do?',
             choices: [
                 'Display all departments',
-                'Dispaly all roles',
+                'Display all roles',
                 'Display all employees',
                 'Add department',
                 'Add role',
@@ -523,7 +525,7 @@ const promptChoices = function() {
         }
     ])
     .then((answers) => {
-        const{initialChoices} = answer;
+        const{initialChoices} = answers;
 
         if(initialChoices === 'Display all departments') {
             displayDepartments();

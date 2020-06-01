@@ -5,6 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "console.table": "^0.10.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "inquirer": "^7.1.0",
     "mysql2": "^2.1.0",
@@ -17,7 +18,7 @@
     "test": "jest",
     "migrate": "mysql db/employees.db < db/schema.sql",
     "seed": "mysql db/employees.db < db/seeds.sql",
-    "db": "mysql -u root -p 'db/election.db'",
+    "db": "mysql db/election.db",
     "start": "node server.js"
   },
   "repository": {
